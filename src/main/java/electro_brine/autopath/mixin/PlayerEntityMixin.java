@@ -1,7 +1,6 @@
 
 package electro_brine.autopath.mixin;
 
-import mrnavastar.kingdoms.api.interfaces.PlayerEntityInf;
 import mrnavastar.kingdoms.types.Claim;
 import mrnavastar.kingdoms.types.Kingdom;
 import mrnavastar.kingdoms.util.AdminClaimManager;
@@ -13,18 +12,19 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.ArrayList;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
+
+    @Shadow public abstract float getBlockBreakingSpeed(BlockState block);
 
     private BlockPos playerPos = this.getBlockPos();
 
@@ -62,10 +62,12 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public void Block() {
         ServerWorld world = (ServerWorld) this.world;
         Block playerBlock = world.getBlockState(this.getBlockPos()).getBlock();
+        BlockPos playBlockPos = new BlockPos(this.getBlockPos().getX(), this.getBlockPos().getY() - .5, this.getBlockPos().getZ());
+        Block playBlock = world.getBlockState(playBlockPos).getBlock();
         BlockPos blockPos = new BlockPos( this.getBlockPos().getX(), this.getBlockPos().getY() - .5, this.getBlockPos().getZ());
         Block block = world.getBlockState(blockPos).getBlock();
 
-        boolean pathCreate = Math.random()*(100) <= 5 && !isInClaim(blockPos) && !this.isSneaking() && !this.getStatusEffects().contains(new StatusEffectInstance(StatusEffects.SLOW_FALLING)) && !this.getStatusEffects().contains(new StatusEffectInstance(StatusEffects.INVISIBILITY)) && playerBlock != Blocks.WATER && playerBlock != Blocks.BAMBOO && playerBlock != Blocks.SUGAR_CANE && playerBlock != Blocks.NETHER_WART && playerBlock != Blocks.SWEET_BERRY_BUSH;
+        boolean pathCreate = Math.random()*(100) <= 5 && !isInClaim(blockPos) && !this.isSneaking() && !this.getStatusEffects().contains(new StatusEffectInstance(StatusEffects.SLOW_FALLING)) && !this.getStatusEffects().contains(new StatusEffectInstance(StatusEffects.INVISIBILITY)) && playerBlock != Blocks.WATER && playerBlock != Blocks.BAMBOO && playerBlock != Blocks.SUGAR_CANE && playerBlock != Blocks.NETHER_WART && playerBlock != Blocks.SWEET_BERRY_BUSH && playBlock != Blocks.WATER;
         boolean gravelChance = Math.random()*(100) <= 10;
         boolean glassChance = Math.random() * (1000) <= 1;
         boolean roadDecay = Math.random()*(1000)<=1;
